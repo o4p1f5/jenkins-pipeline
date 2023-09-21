@@ -56,7 +56,7 @@ pipeline {
                 '''
 
                 // 배포가 완료되면 로그에 메시지 출력
-                echo 'WAR 파일을 원격 Tomcat 서버로 배포했습니다..'
+                echo 'WAR 파일을 원격 Tomcat 서버로 배포했습니다...'
             }
         }
 
