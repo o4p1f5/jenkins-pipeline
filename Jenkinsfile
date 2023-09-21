@@ -48,7 +48,7 @@ pipeline {
 
                 sh '''
                 ssh -o StrictHostKeyChecking=no root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/ROOT /usr/local/src/tomcat/webapps/ROOT.old"
-                scp build/libs/test2-0.0.1-SNAPSHOT.war root@10.0.1.10:/usr/local/src/tomcat/webapps
+                scp -o StrictHostKeyChecking=no build/libs/test2-0.0.1-SNAPSHOT.war root@10.0.1.10:/usr/local/src/tomcat/webapps
                 ssh -o StrictHostKeyChecking=no root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/test2-0.0.1-SNAPSHOT/ /usr/local/src/tomcat/webapps/ROOT/"
                 
                 '''
