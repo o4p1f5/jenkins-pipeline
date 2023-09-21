@@ -13,7 +13,7 @@ pipeline {
                     // Git checkout step with Git tool named "Default"
                     checkout([
                         $class: 'GitSCM',  // GitSCM 클래스를 사용하여 Git 관련 설정을 정의합니다.
-                        branches: [[name: '*/master']],  // 가져올 브랜치를 '*/master'로 지정합니다.
+                        branches: [[name: '*/war']],  // 가져올 브랜치를 '*/master'로 지정합니다.
                         doGenerateSubmoduleConfigurations: false,  // 서브모듈 구성을 자동으로 생성하지 않도록 설정합니다.
                         extensions: [],  // Git 확장 옵션을 지정하지 않습니다.
                         submoduleCfg: [],  // 서브모듈 구성도 지정하지 않습니다.
