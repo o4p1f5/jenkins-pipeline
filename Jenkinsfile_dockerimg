@@ -8,8 +8,8 @@ pipeline {
         CONTAINER_NAME = "test"
         IMAGE_NAME = "gradle-build"
         IMAGE_STORAGE = "omj.kr.ncr.ntruss.com"
-        NCP_ACCESS_KEY = credentials('accessKey')
-        NCP_SECRET_KEY = credentials('secretKey')
+        NCP_ACCESS_KEY = credentials('accesskey')
+        NCP_SECRET_KEY = credentials('secretkey')
     }
     stages {
         stage('Deploy 준비') {
