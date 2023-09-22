@@ -41,16 +41,10 @@ pipeline {
 
         stage('Deploy to Tomcat') {
             steps {
-                // Copy the WAR file to Tomcat server using scp with SSH key authentication
-                // 기존 ROOT.war, ROOT.old 파일은 지우고 ROOT 파일을 ROOT.old로 변경
-                // scp 명령어를 통해 10.0.3.10(tomcat 서버)로 war파일 배포(여기선 hello-spring-0.0.1-SNAPSHOT.war)
-                // hello-spring-0.0.1-SNAPSHOT.war 파일을 ROOT라는 이름으로 변경
-
                 sh '''
-                ssh-keyscan -H 10.0.1.10 >> /var/lib/jenkins/.ssh/known_hosts
-                ssh root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/ROOT /usr/local/src/tomcat/webapps/ROOT.old"
-                scp build/libs/test2-0.0.1-SNAPSHOT.war root@10.0.1.10:/usr/local/src/tomcat/webapps
-                ssh root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/test2-0.0.1-SNAPSHOT.war /usr/local/src/tomcat/webapps/ROOT.war"
+                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/ROOT /usr/local/src/tomcat/webapps/ROOT.old"
+                scp -o StrictHostKeyChecking=no build/libs/test2-0.0.1-SNAPSHOT.war root@10.0.1.10:/usr/local/src/tomcat/webapps
+                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/test2-0.0.1-SNAPSHOT.war /usr/local/src/tomcat/webapps/ROOT.war"
                 
                 '''
 
@@ -59,5 +53,33 @@ pipeline {
             }
         }
 
+        stage('Docker Image') {
+            steps {
+                sh '''
+
+                docker commit blue omj.kr.ncr.ntruss.com/blue-img:latest
+                docker push omj.kr.ncr.ntruss.com/blue-img:latest
+                
+                '''
+
+                // 배포가 완료되면 로그에 메시지 출력
+                echo 'docker image를 생성해 Container Registry에 올렸습니다.'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+
+                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "docker stop green"
+                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "docker rm green'
+                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "docker run -it --name green -d --privileged omj.kr.ncr.ntruss.com/blue-img"
+                
+                '''
+
+                // 배포가 완료되면 로그에 메시지 출력
+                echo 'Container Registry의 이미지를 배포했습니다.'
+            }
+        }
     }
 }
