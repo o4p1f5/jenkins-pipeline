@@ -6,7 +6,7 @@ pipeline {
     }
     environment { 
         CONTAINER_NAME = "test"
-        IMAGE_NAME = "gradle-build"
+        IMAGE_NAME = "gradle"
         IMAGE_STORAGE = "omj.kr.ncr.ntruss.com"
         NCP_ACCESS_KEY = credentials('accessKey')
         NCP_SECRET_KEY = credentials('secretKey')
