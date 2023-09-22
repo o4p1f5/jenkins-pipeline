@@ -19,7 +19,6 @@ pipeline {
                 echo "Deploy.."
                 sh '''
                 docker rm -f ${CONTAINER_NAME}
-                docker rmi -f ${IMAGE_STORAGE}/${IMAGE_NAME}:latest
                 docker rmi -f ${IMAGE_STORAGE}/${BASE_IMAGE_NAME}:latest
                 '''
                 echo '배포 준비가 끝났습니다.'
