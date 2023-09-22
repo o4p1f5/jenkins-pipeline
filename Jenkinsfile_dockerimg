@@ -1,84 +1,31 @@
 pipeline {
-    agent any
-
-    tools {
-         // 지정된 이름으로 Gradle을 사용하도록 설정
-        gradle 'gradle8.2.1'
+    agent { 
+        node {
+            label 'docker-agent-docker'
+            }
+      }
+    environment { 
+        CONTAINER_NAME = "test"
+        IMAGE_NAME = "build_img"
+        IMAGE_STORAGE = "omj.kr.ncr.ntruss.com"
+        IMAGE_STORAGE_CREDENTIAL = "docker-registry"
+        NCP_ACCESS_KEY = credentials('accessKey')
+        NCP_SECRET_KEY = credentials('secretKey')
     }
-
     stages {
-        stage('Checkout') {
-            steps {
-                script {
-                    // Git checkout step with Git tool named "Default"
-                    checkout([
-                        $class: 'GitSCM',  // GitSCM 클래스를 사용하여 Git 관련 설정을 정의합니다.
-                        branches: [[name: '*/war']],  // 가져올 브랜치를 '*/master'로 지정합니다.
-                        doGenerateSubmoduleConfigurations: false,  // 서브모듈 구성을 자동으로 생성하지 않도록 설정합니다.
-                        extensions: [],  // Git 확장 옵션을 지정하지 않습니다.
-                        submoduleCfg: [],  // 서브모듈 구성도 지정하지 않습니다.
-                        userRemoteConfigs: [  // Git 원격 저장소 설정을 정의합니다.
-                            [url: 'https://github.com/o4p1f5/IntelliJ-test-2.git']  // 원격 저장소 URL을 지정합니다.
-                        ]
-                    ])
-                }
-            }
-        }
-
-        stage('Prepare Gradle Wrapper') {
-            steps {
-                // 빌드할 수 있도록 gradlew 파일에 권한 부여
-                sh 'chmod +x ./gradlew'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                // Gradle clean and build
-                sh './gradlew clean build'
-            }
-        }
-
-        stage('Deploy to Tomcat') {
-            steps {
-                sh '''
-                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/ROOT /usr/local/src/tomcat/webapps/ROOT.old"
-                scp -o StrictHostKeyChecking=no build/libs/test2-0.0.1-SNAPSHOT.war root@10.0.1.10:/usr/local/src/tomcat/webapps
-                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "mv /usr/local/src/tomcat/webapps/test2-0.0.1-SNAPSHOT.war /usr/local/src/tomcat/webapps/ROOT.war"
-                
-                '''
-
-                // 배포가 완료되면 로그에 메시지 출력
-                echo 'WAR 파일을 원격 Tomcat 서버로 배포했습니다.'
-            }
-        }
-
-        stage('Docker Image') {
-            steps {
-                sh '''
-
-                docker commit blue omj.kr.ncr.ntruss.com/blue-img:latest
-                docker push omj.kr.ncr.ntruss.com/blue-img:latest
-                
-                '''
-
-                // 배포가 완료되면 로그에 메시지 출력
-                echo 'docker image를 생성해 Container Registry에 올렸습니다.'
-            }
-        }
-
         stage('Deploy') {
+
             steps {
+                echo "Deploy.."
                 sh '''
-
-                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "docker stop green"
-                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "docker rm green'
-                ssh -o StrictHostKeyChecking=no root@10.0.1.10 "docker run -it --name green -d --privileged omj.kr.ncr.ntruss.com/blue-img"
-                
+                docker rm -f ${CONTAINER_NAME}
+                docker rmi -f ${IMAGE_STORAGE}/${IMAGE_NAME}:latest
+                docker login -u ${NCP_ACCESS_KEY} ${IMAGE_STORAGE} -p ${NCP_SECRET_KEY}
+                docker pull ${IMAGE_STORAGE}/${IMAGE_NAME}:latest
+                docker images
+                docker run -d --name ${CONTAINER_NAME} -p 8080:8080 ${IMAGE_STORAGE}/${IMAGE_NAME}:latest
+                docker ps
                 '''
-
-                // 배포가 완료되면 로그에 메시지 출력
-                echo 'Container Registry의 이미지를 배포했습니다.'
             }
         }
     }
