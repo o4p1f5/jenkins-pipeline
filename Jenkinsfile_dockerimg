@@ -3,12 +3,11 @@ pipeline {
         node {
             label 'docker-agent-docker'
             }
-      }
+    }
     environment { 
         CONTAINER_NAME = "test"
-        IMAGE_NAME = "build_img"
+        IMAGE_NAME = "gradle-build"
         IMAGE_STORAGE = "omj.kr.ncr.ntruss.com"
-        IMAGE_STORAGE_CREDENTIAL = "docker-registry"
         NCP_ACCESS_KEY = credentials('accessKey')
         NCP_SECRET_KEY = credentials('secretKey')
     }
