@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no root@221.168.36.223 "docker rmi omj.kr.ncr.ntruss.com/docker-img"                    
+                    ssh root@221.168.36.223 "docker rmi omj.kr.ncr.ntruss.com/docker-img"                    
                     '''
                 }
             }
